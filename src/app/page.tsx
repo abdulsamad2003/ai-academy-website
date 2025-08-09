@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -44,7 +44,7 @@ export default function Home() {
     const numDots = 12;
     let mouseX = 0;
     let mouseY = 0;
-    let clearTrailTimer: number | null = null;
+    let clearTrailTimer: NodeJS.Timeout | null = null;
 
     // Create trail dots
     for (let i = 0; i < numDots; i++) {
@@ -568,7 +568,7 @@ export default function Home() {
               Why AI Academy?
             </h2>
             <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-              We're bridging the gap between traditional education and the AI-driven future. 
+              We&apos;re bridging the gap between traditional education and the AI-driven future. 
               Our courses are specifically designed for college and university students who want to stay ahead of the curve.
             </p>
           </div>
@@ -615,8 +615,8 @@ export default function Home() {
           >
             <h4 className="text-2xl font-bold text-gray-900 mb-6">Student Success Story</h4>
             <p className="text-lg text-gray-600 mb-6 max-w-3xl mx-auto">
-              "After completing the AI Academy programs, I landed a $75k automation engineer role at a tech startup. 
-              The hands-on experience with N8N and Zapier was exactly what employers were looking for!"
+              &ldquo;After completing the AI Academy programs, I landed a $75k automation engineer role at a tech startup. 
+              The hands-on experience with N8N and Zapier was exactly what employers were looking for!&rdquo;
             </p>
             <div className="flex items-center justify-center space-x-4">
               <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
