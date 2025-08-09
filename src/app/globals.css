@@ -10,9 +10,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --color-cream: #f5f5dc;
-  --color-sepia: #704214;
-  --color-parchment: #f4f1e8;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -33,74 +30,31 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Retro animations */
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
+/* Floating animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
   }
-  to {
-    transform: rotate(360deg);
+  50% {
+    transform: translateY(-20px);
   }
 }
 
-.animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(180deg);
+  }
 }
 
-/* Vintage effects */
-.vintage-glow {
-  text-shadow: 2px 2px 4px rgba(116, 66, 20, 0.3);
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
 
-.parchment-shadow {
-  box-shadow: 
-    0 4px 8px rgba(116, 66, 20, 0.2),
-    0 8px 16px rgba(180, 83, 9, 0.1),
-    inset 0 1px 0 rgba(245, 245, 220, 0.5);
-}
-
-.vintage-border {
-  border-image: linear-gradient(45deg, #92400e, #d97706, #92400e) 1;
-}
-
-/* Custom cream color classes */
-.text-cream {
-  color: #f5f5dc;
-}
-
-.bg-cream {
-  background-color: #f5f5dc;
-}
-
-.border-cream {
-  border-color: #f5f5dc;
-}
-
-/* Retro scanlines */
-.scanlines::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 255, 255, 0.1) 2px,
-    rgba(0, 255, 255, 0.1) 4px
-  );
-  pointer-events: none;
-}
-
-/* Enhanced animation delays for staggered effects */
-.animate-pulse-delay-1000 {
-  animation-delay: 1000ms;
-}
-
-.animate-pulse-delay-500 {
-  animation-delay: 500ms;
+.animate-float-slow {
+  animation: floatSlow 8s ease-in-out infinite;
 }
 
 /* Reveal animations */
@@ -112,39 +66,6 @@ html {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes fadeInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes fadeInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
   }
 }
 
@@ -189,41 +110,49 @@ html {
   transform: scale(1);
 }
 
-/* Floating background shapes */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
+/* Simple Clean Cursor - Bigger Main Cursor */
+body {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="rgba(0,0,0,0.8)"/></svg>') 12 12, auto;
 }
 
-@keyframes floatSlow {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-15px) rotate(180deg);
-  }
+/* Interactive elements get an even larger cursor */
+button, a, .cursor-pointer, .course-card, .social-icon, .mobile-menu-button, nav button, nav a, input, textarea {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 50 50"><circle cx="25" cy="25" r="10" fill="rgba(0,0,0,0.9)"/></svg>') 25 25, pointer;
 }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
+/* Cursor Trailing Line */
+.cursor-trail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
 }
 
-.animate-float-slow {
-  animation: floatSlow 8s ease-in-out infinite;
+.cursor-trail-svg {
+  width: 100%;
+  height: 100%;
 }
 
-/* Backdrop blur support for older browsers */
-.backdrop-blur-fallback {
-  background-color: rgba(15, 23, 42, 0.8);
+.cursor-trail-path {
+  fill: none;
+  stroke: rgba(0, 0, 0, 0.4);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.2s ease-out, stroke-width 0.2s ease-out;
 }
 
-@supports (backdrop-filter: blur()) {
-  .backdrop-blur-fallback {
-    backdrop-filter: blur(8px);
-    background-color: rgba(15, 23, 42, 0.6);
-  }
+/* Hover state for trail */
+.cursor-trail.hover .cursor-trail-path {
+  stroke: rgba(0, 0, 0, 0.6);
+  stroke-width: 3;
+}
+
+/* Active state for trail */
+.cursor-trail.active .cursor-trail-path {
+  stroke: rgba(0, 0, 0, 0.8);
+  stroke-width: 4;
 }

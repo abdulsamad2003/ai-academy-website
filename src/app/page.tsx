@@ -38,6 +38,96 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
+  // Smooth cursor trail effect
+  useEffect(() => {
+    const trailDots: HTMLDivElement[] = [];
+    const numDots = 12;
+    let mouseX = 0;
+    let mouseY = 0;
+    let clearTrailTimer: number | null = null;
+
+    // Create trail dots
+    for (let i = 0; i < numDots; i++) {
+      const dot = document.createElement('div');
+      dot.style.position = 'fixed';
+      dot.style.width = '6px';
+      dot.style.height = '6px';
+      dot.style.backgroundColor = `rgba(0, 0, 0, ${0.7 - (i * 0.06)})`;
+      dot.style.borderRadius = '50%';
+      dot.style.pointerEvents = 'none';
+      dot.style.zIndex = '9999';
+      dot.style.transform = 'translate(-50%, -50%)';
+      dot.style.transition = 'all 0.1s ease-out';
+      dot.className = 'cursor-trail-dot';
+      document.body.appendChild(dot);
+      trailDots.push(dot);
+    }
+
+    const updateTrail = () => {
+      trailDots.forEach((dot, index) => {
+        const delay = index * 0.05;
+        const targetX = mouseX;
+        const targetY = mouseY;
+        
+        setTimeout(() => {
+          dot.style.left = targetX + 'px';
+          dot.style.top = targetY + 'px';
+        }, delay * 1000);
+      });
+    };
+
+    const hideTrail = () => {
+      trailDots.forEach((dot, index) => {
+        // Each dot moves to cursor position and fades out
+        setTimeout(() => {
+          dot.style.left = mouseX + 'px';
+          dot.style.top = mouseY + 'px';
+          dot.style.opacity = '0';
+          dot.style.transform = 'translate(-50%, -50%) scale(0.3)';
+        }, index * 30); // Stagger the merge animation
+      });
+    };
+
+    const showTrail = () => {
+      trailDots.forEach((dot, index) => {
+        dot.style.opacity = (0.7 - (index * 0.06)).toString();
+        dot.style.transform = 'translate(-50%, -50%) scale(1)';
+      });
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      
+      showTrail();
+      updateTrail();
+
+      // Clear existing timer
+      if (clearTrailTimer) {
+        clearTimeout(clearTrailTimer);
+      }
+
+      // Set timer to hide trail
+      clearTrailTimer = setTimeout(() => {
+        hideTrail();
+      }, 150);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      if (clearTrailTimer) {
+        clearTimeout(clearTrailTimer);
+      }
+      trailDots.forEach(dot => {
+        if (dot.parentNode) {
+          dot.parentNode.removeChild(dot);
+        }
+      });
+    };
+  }, []);
+
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     setIsMobileMenuOpen(false); // Close mobile menu after navigation
@@ -98,11 +188,11 @@ export default function Home() {
               <button onClick={() => scrollToSection('contact')} className="hidden sm:block bg-black text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-800 transition-all duration-300">
                 Enroll Now
               </button>
-              {/* Mobile menu button */}
-              <button 
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden text-gray-700 focus:outline-none"
-              >
+                        {/* Mobile menu button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden text-gray-700 focus:outline-none mobile-menu-button"
+          >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {isMobileMenuOpen ? (
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -210,8 +300,66 @@ export default function Home() {
       </section>
 
       {/* Programs Section */}
-      <section id="programs" className="py-20 bg-gray-50 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="programs" className="py-20 bg-gray-50 relative z-10 overflow-hidden">
+        {/* Programs Background Shapes */}
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Large decorative circle - top left */}
+          <div className="absolute -top-40 -left-40 w-96 h-96 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full opacity-60 animate-float-slow"></div>
+          
+          {/* Medium diamond - top right */}
+          <div className="absolute top-16 right-16 w-40 h-40 bg-gradient-to-br from-gray-300 to-gray-400 opacity-50 animate-float transform rotate-45"></div>
+          
+          {/* Geometric hexagon - bottom left */}
+          <div className="absolute bottom-20 left-20 w-32 h-32 opacity-45 animate-float-slow transform rotate-12"
+               style={{
+                 background: 'linear-gradient(135deg, #d1d5db, #9ca3af)',
+                 clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+               }}>
+          </div>
+          
+          {/* Floating rectangles */}
+          <div className="absolute top-1/3 right-1/4 w-6 h-24 bg-gradient-to-b from-gray-300 to-gray-400 opacity-55 animate-float transform rotate-12"></div>
+          <div className="absolute bottom-1/3 left-1/3 w-8 h-32 bg-gradient-to-b from-gray-200 to-gray-300 opacity-50 animate-float-slow transform -rotate-12"></div>
+          
+          {/* Small circles scattered */}
+          <div className="absolute top-20 left-1/2 w-16 h-16 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full opacity-60 animate-float"></div>
+          <div className="absolute bottom-16 right-1/3 w-12 h-12 bg-gray-300 rounded-full opacity-65 animate-float-slow"></div>
+          <div className="absolute top-2/3 left-16 w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full opacity-70 animate-float"></div>
+          
+          {/* Triangular accents */}
+          <div className="absolute top-1/4 right-12 w-0 h-0 opacity-55 animate-float"
+               style={{
+                 borderLeft: '25px solid transparent',
+                 borderRight: '25px solid transparent',
+                 borderBottom: '43px solid #9ca3af'
+               }}>
+          </div>
+          <div className="absolute bottom-1/4 left-1/4 w-0 h-0 opacity-50 animate-float-slow"
+               style={{
+                 borderLeft: '20px solid transparent',
+                 borderRight: '20px solid transparent',
+                 borderBottom: '35px solid #d1d5db'
+               }}>
+          </div>
+          
+          {/* Wavy decorative lines */}
+          <div className="absolute top-0 left-1/3 w-1 h-full bg-gradient-to-b from-transparent via-gray-300 to-transparent opacity-30"></div>
+          <div className="absolute top-0 right-1/3 w-1 h-full bg-gradient-to-b from-transparent via-gray-400 to-transparent opacity-25"></div>
+          
+          {/* Subtle dot pattern */}
+          <div className="absolute inset-0 opacity-15"
+               style={{
+                 backgroundImage: `radial-gradient(circle at 3px 3px, #6b7280 1px, transparent 0)`,
+                 backgroundSize: '50px 50px'
+               }}>
+          </div>
+          
+          {/* Additional accent elements */}
+          <div className="absolute top-32 right-1/2 w-10 h-10 bg-gray-400 opacity-60 animate-float transform rotate-45"></div>
+          <div className="absolute bottom-32 left-1/2 w-14 h-14 bg-gradient-to-br from-gray-300 to-gray-400 opacity-55 animate-float-slow transform rotate-12"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                   <div 
           className={`text-center mb-16 reveal reveal-up ${revealedElements.has('programs-header') ? 'revealed' : ''}`}
           data-reveal-id="programs-header"
@@ -227,7 +375,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* N8N Course */}
             <div 
-              className={`bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 reveal reveal-left ${revealedElements.has('course-n8n') ? 'revealed' : ''}`}
+              className={`bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 reveal reveal-left course-card ${revealedElements.has('course-n8n') ? 'revealed' : ''}`}
               data-reveal-id="course-n8n"
               style={{ transitionDelay: '0.1s' }}
             >
@@ -260,7 +408,7 @@ export default function Home() {
 
             {/* Zapier Course */}
             <div 
-              className={`bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 reveal reveal-up ${revealedElements.has('course-zapier') ? 'revealed' : ''}`}
+              className={`bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 reveal reveal-up course-card ${revealedElements.has('course-zapier') ? 'revealed' : ''}`}
               data-reveal-id="course-zapier"
               style={{ transitionDelay: '0.2s' }}
             >
@@ -293,7 +441,7 @@ export default function Home() {
 
             {/* AI Tools Course */}
             <div 
-              className={`bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 reveal reveal-right ${revealedElements.has('course-ai') ? 'revealed' : ''}`}
+              className={`bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 reveal reveal-right course-card ${revealedElements.has('course-ai') ? 'revealed' : ''}`}
               data-reveal-id="course-ai"
               style={{ transitionDelay: '0.3s' }}
             >
@@ -330,7 +478,20 @@ export default function Home() {
             className={`mt-16 text-center reveal reveal-scale ${revealedElements.has('bundle-offer') ? 'revealed' : ''}`}
             data-reveal-id="bundle-offer"
           >
-            <div className="bg-black rounded-lg p-12 text-white shadow-2xl">
+            <div className="bg-black rounded-lg p-12 text-white shadow-2xl relative overflow-hidden">
+              {/* Bundle offer background elements */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute -top-8 -right-8 w-24 h-24 bg-gradient-to-br from-gray-700 to-gray-800 rounded-full opacity-30 animate-float"></div>
+                <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-gray-700 opacity-25 animate-float-slow transform rotate-45"></div>
+                <div className="absolute top-1/2 right-4 w-3 h-16 bg-gradient-to-b from-gray-600 to-gray-700 opacity-40 animate-float"></div>
+                <div className="absolute bottom-4 left-1/3 w-0 h-0 opacity-30 animate-float-slow"
+                     style={{
+                       borderLeft: '15px solid transparent',
+                       borderRight: '15px solid transparent',
+                       borderBottom: '26px solid #4b5563'
+                     }}>
+                </div>
+              </div>
               <h3 className="text-4xl font-bold mb-4">Complete AI Academy Bundle</h3>
               <p className="text-xl mb-8 text-gray-300">Get all three courses and save $200!</p>
               <div className="flex items-center justify-center space-x-6 mb-8">
@@ -347,8 +508,58 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-20 bg-white relative z-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="about" className="py-20 bg-white relative z-10 overflow-hidden">
+        {/* Background Shapes for About Section */}
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Large decorative circle - top left */}
+          <div className="absolute -top-20 -left-20 w-64 h-64 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full opacity-70 animate-float-slow shadow-2xl"></div>
+          
+          {/* Medium hexagon - top right */}
+          <div className="absolute top-10 right-10 w-32 h-32 opacity-60 animate-float transform rotate-12 shadow-lg"
+               style={{
+                 background: 'linear-gradient(135deg, #6b7280, #4b5563)',
+                 clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+               }}>
+          </div>
+          
+          {/* Small circles scattered */}
+          <div className="absolute top-1/4 left-1/4 w-12 h-12 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full opacity-65 animate-float shadow-lg"></div>
+          <div className="absolute bottom-1/3 right-1/3 w-8 h-8 bg-gray-400 rounded-full opacity-70 animate-float-slow shadow-md"></div>
+          
+          {/* Diamond shape - bottom left */}
+          <div className="absolute bottom-20 left-16 w-20 h-20 bg-gradient-to-br from-gray-400 to-gray-500 opacity-65 animate-float transform rotate-45 shadow-lg"></div>
+          
+          {/* Wavy line decoration - right side */}
+          <div className="absolute top-1/2 right-0 w-3 h-40 opacity-60 animate-float-slow shadow-md"
+               style={{
+                 background: 'linear-gradient(to bottom, transparent, #6b7280, transparent)',
+                 borderRadius: '50px'
+               }}>
+          </div>
+          
+          {/* Geometric triangle - bottom right */}
+          <div className="absolute bottom-10 right-20 w-0 h-0 opacity-60 animate-float drop-shadow-lg"
+               style={{
+                 borderLeft: '30px solid transparent',
+                 borderRight: '30px solid transparent',
+                 borderBottom: '52px solid #6b7280'
+               }}>
+          </div>
+          
+          {/* Enhanced pattern overlay */}
+          <div className="absolute inset-0 opacity-15"
+               style={{
+                 backgroundImage: `radial-gradient(circle at 2px 2px, #374151 1px, transparent 0)`,
+                 backgroundSize: '40px 40px'
+               }}>
+          </div>
+          
+          {/* Additional accent shapes */}
+          <div className="absolute top-16 left-1/3 w-6 h-6 bg-gray-500 opacity-60 animate-float transform rotate-12 shadow-sm"></div>
+          <div className="absolute bottom-1/4 left-1/3 w-4 h-16 bg-gradient-to-b from-gray-400 to-gray-500 opacity-65 animate-float-slow shadow-md"></div>
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div 
             className={`text-center mb-16 reveal reveal-up ${revealedElements.has('about-header') ? 'revealed' : ''}`}
             data-reveal-id="about-header"
@@ -366,24 +577,30 @@ export default function Home() {
             className={`grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 reveal reveal-up ${revealedElements.has('about-features') ? 'revealed' : ''}`}
             data-reveal-id="about-features"
           >
-            <div className="text-center">
-              <div className="w-16 h-16 bg-black rounded-lg flex items-center justify-center mx-auto mb-6">
+            <div className="text-center relative">
+              {/* Small decorative shape behind icon */}
+              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 w-20 h-20 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full opacity-80 animate-pulse shadow-lg"></div>
+              <div className="w-16 h-16 bg-black rounded-lg flex items-center justify-center mx-auto mb-6 relative z-10 shadow-lg hover:shadow-xl transition-all duration-300">
                 <span className="text-white text-2xl">🚀</span>
               </div>
               <h4 className="text-xl font-bold text-gray-900 mb-4">Hands-on Learning</h4>
               <p className="text-gray-600">Build real projects and workflows you can showcase to employers. Get practical experience with industry-standard tools.</p>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 bg-black rounded-lg flex items-center justify-center mx-auto mb-6">
+            <div className="text-center relative">
+              {/* Small decorative shape behind icon */}
+              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 w-20 h-20 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full opacity-80 animate-pulse shadow-lg" style={{ animationDelay: '0.5s' }}></div>
+              <div className="w-16 h-16 bg-black rounded-lg flex items-center justify-center mx-auto mb-6 relative z-10 shadow-lg hover:shadow-xl transition-all duration-300">
                 <span className="text-white text-2xl">👨‍🏫</span>
               </div>
               <h4 className="text-xl font-bold text-gray-900 mb-4">Industry Experts</h4>
               <p className="text-gray-600">Learn from professionals currently working with Fortune 500 companies. Get insights from real-world practitioners.</p>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 bg-black rounded-lg flex items-center justify-center mx-auto mb-6">
+            <div className="text-center relative">
+              {/* Small decorative shape behind icon */}
+              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 w-20 h-20 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full opacity-80 animate-pulse shadow-lg" style={{ animationDelay: '1s' }}></div>
+              <div className="w-16 h-16 bg-black rounded-lg flex items-center justify-center mx-auto mb-6 relative z-10 shadow-lg hover:shadow-xl transition-all duration-300">
                 <span className="text-white text-2xl">💼</span>
               </div>
               <h4 className="text-xl font-bold text-gray-900 mb-4">Career Support</h4>
@@ -482,8 +699,54 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-black py-12 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <footer className="bg-black py-12 relative z-10 overflow-hidden">
+        {/* Footer Background Shapes */}
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Large gradient circle - top right */}
+          <div className="absolute -top-32 -right-32 w-80 h-80 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full opacity-60 animate-float-slow"></div>
+          
+          {/* Medium square - bottom left */}
+          <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-gradient-to-tr from-gray-700 to-gray-800 opacity-50 animate-float transform rotate-12"></div>
+          
+          {/* Geometric lines pattern */}
+          <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-gray-700 to-transparent opacity-40"></div>
+          <div className="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-transparent via-gray-700 to-transparent opacity-40"></div>
+          
+          {/* Small floating elements */}
+          <div className="absolute top-16 left-1/3 w-8 h-8 bg-gray-700 opacity-60 animate-float transform rotate-45"></div>
+          <div className="absolute bottom-20 right-1/5 w-6 h-6 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full opacity-70 animate-float-slow"></div>
+          <div className="absolute top-1/2 left-16 w-4 h-20 bg-gradient-to-b from-gray-700 to-gray-800 opacity-50 animate-float"></div>
+          
+          {/* Hexagon shape - center */}
+          <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-24 h-24 opacity-40 animate-float-slow"
+               style={{
+                 background: 'linear-gradient(135deg, #4b5563, #374151)',
+                 clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+               }}>
+          </div>
+          
+          {/* Accent triangles */}
+          <div className="absolute bottom-12 left-1/4 w-0 h-0 opacity-50 animate-float"
+               style={{
+                 borderLeft: '20px solid transparent',
+                 borderRight: '20px solid transparent',
+                 borderBottom: '35px solid #4b5563'
+               }}>
+          </div>
+          
+          {/* Subtle grid pattern */}
+          <div className="absolute inset-0 opacity-10"
+               style={{
+                 backgroundImage: `
+                   linear-gradient(90deg, #374151 1px, transparent 1px),
+                   linear-gradient(180deg, #374151 1px, transparent 1px)
+                 `,
+                 backgroundSize: '60px 60px'
+               }}>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
@@ -496,14 +759,29 @@ export default function Home() {
                 Empowering the next generation of AI professionals through hands-on education and real-world experience.
               </p>
               <div className="flex space-x-4">
-                <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-600 transition-colors cursor-pointer">
-                  <span className="text-white text-sm">f</span>
+                <div className="relative group social-icon">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
+                  <div className="relative w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-600 transition-all duration-300 shadow-lg hover:shadow-xl">
+                    <span className="text-white text-sm font-bold">f</span>
+                  </div>
                 </div>
-                <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-600 transition-colors cursor-pointer">
-                  <span className="text-white text-sm">t</span>
+                <div className="relative group social-icon">
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
+                  <div className="relative w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-600 transition-all duration-300 shadow-lg hover:shadow-xl">
+                    <span className="text-white text-sm font-bold">t</span>
+                  </div>
                 </div>
-                <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-600 transition-colors cursor-pointer">
-                  <span className="text-white text-sm">in</span>
+                <div className="relative group social-icon">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
+                  <div className="relative w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-600 transition-all duration-300 shadow-lg hover:shadow-xl">
+                    <span className="text-white text-xs font-bold">in</span>
+                  </div>
+                </div>
+                <div className="relative group social-icon">
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-red-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
+                  <div className="relative w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-600 transition-all duration-300 shadow-lg hover:shadow-xl">
+                    <span className="text-white text-xs font-bold">yt</span>
+                  </div>
                 </div>
               </div>
             </div>
