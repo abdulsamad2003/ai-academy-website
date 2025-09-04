@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Academy - Master AI Tools for the Future",
-  description: "Learn cutting-edge AI automation tools like N8N, Zapier, and more. Designed for college and university students ready to lead in the AI revolution.",
+  title: "UT-Kloud - Azure Cloud Training ",
+  description: "Learn cutting-edge Azure Cloud Training by Industry Experts. Designed for college and university students and Employees ready to lead in the Azure Cloud revolution.",
 };
 
 export default function RootLayout({
