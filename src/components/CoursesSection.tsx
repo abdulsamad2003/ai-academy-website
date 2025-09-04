@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface CoursesSectionProps {
   revealedElements: Set<string>;
@@ -80,8 +80,22 @@ const courses: Course[] = [
 export default function CoursesSection({ revealedElements }: CoursesSectionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const openModal = () => {
+    setIsModalOpen(true);
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+  };
+  
+  const closeModal = () => {
+    setIsModalOpen(false);
+    document.body.style.overflow = 'unset'; // Restore scrolling
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = 'unset'; // Ensure scrolling is restored
+    };
+  }, []);
 
   return (
     <>
@@ -240,42 +254,42 @@ export default function CoursesSection({ revealedElements }: CoursesSectionProps
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div 
-          className={`text-center mb-12 reveal reveal-up ${revealedElements.has('programs-header') ? 'revealed' : ''}`}
+          className={`text-center mb-8 reveal reveal-up ${revealedElements.has('programs-header') ? 'revealed' : ''}`}
           data-reveal-id="programs-header"
         >
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2">
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold mb-2">
             <span className="text-gray-900">Our</span>
-            <span className="text-[#003366] ml-3">Courses</span>
+            <span className="text-[#003366] ml-2">Courses</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Master Microsoft Azure with comprehensive certification courses designed by industry experts. <br />
+          <p className="text-sm sm:text-lg lg:text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed px-4">
+            Master Microsoft Azure with comprehensive certification courses designed by industry experts. <br className="hidden sm:block" />
             <span className="font-semibold">Get certified, get hired, get ahead.</span>
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {courses.map((course) => (
             <div 
               key={course.id}
-              className={`group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-200 overflow-hidden reveal ${course.animation} course-card ${revealedElements.has(course.id) ? 'revealed' : ''} flex flex-col h-full`}
+              className={`group bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden reveal ${course.animation} course-card ${revealedElements.has(course.id) ? 'revealed' : ''} flex flex-col h-full`}
               data-reveal-id={course.id}
               style={{ transitionDelay: course.delay }}
             >
-              {/* Course Image */}
-              <div className="relative h-48 overflow-hidden flex-shrink-0">
+              {/* Course Image - Smaller on Mobile */}
+              <div className="relative h-32 sm:h-40 lg:h-48 overflow-hidden flex-shrink-0">
                 <img 
                   src={course.image} 
                   alt={`${course.title} Course`}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#003366]/90 to-transparent"></div>
-                <div className="absolute bottom-4 left-4">
-                  <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
-                    <span className="text-[#003366] font-bold text-sm">{course.badge}</span>
+                <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4">
+                  <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
+                    <span className="text-[#003366] font-bold text-xs sm:text-sm">{course.badge}</span>
                   </div>
                 </div>
                 {course.popular && (
-                  <div className="absolute top-4 right-4">
+                  <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
                     <div className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold">
                       POPULAR
                     </div>
@@ -283,34 +297,34 @@ export default function CoursesSection({ revealedElements }: CoursesSectionProps
                 )}
               </div>
 
-              {/* Course Content - Flexible container */}
-              <div className="px-5 pt-2 pb-4 flex flex-col flex-grow">
+              {/* Course Content - Mobile Optimized */}
+              <div className="p-3 sm:p-4 lg:p-5 flex flex-col flex-grow">
                 <div className="flex-grow">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-1">{course.title}</h3>
-                  <p className="text-gray-600 mb-4 leading-tight">
+                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-2">{course.title}</h3>
+                  <p className="text-sm sm:text-base text-gray-600 mb-3 leading-relaxed">
                     {course.description}
                   </p>
                   
-                  {/* Course Topics */}
-                  <div className="space-y-1 mb-2">
+                  {/* Course Topics - Compact */}
+                  <div className="space-y-1 mb-3">
                     {course.features.map((feature, index) => (
                       <div key={index} className="flex items-center text-gray-700">
-                        <div className="w-2 h-2 bg-[#003366] rounded-full mr-3 flex-shrink-0"></div>
-                        <span className="text-sm">{feature}</span>
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#003366] rounded-full mr-2 sm:mr-3 flex-shrink-0"></div>
+                        <span className="text-xs sm:text-sm">{feature}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Pricing & CTA - Always at bottom */}
+                {/* Pricing & CTA - Mobile Optimized */}
                 <div className="border-t border-gray-100 pt-3 mt-auto">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="text-3xl font-bold text-[#003366]">{course.price}</div>
-                    <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#003366]">{course.price}</div>
+                    <div className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                       {course.tag}
                     </div>
                   </div>
-                  <button className="w-full bg-[#003366] text-white py-3 rounded-lg font-semibold hover:bg-[#004080] transition-colors duration-300">
+                  <button className="w-full bg-[#003366] text-white py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-[#004080] transition-colors duration-300">
                     Enroll Now
                   </button>
                 </div>
@@ -319,30 +333,30 @@ export default function CoursesSection({ revealedElements }: CoursesSectionProps
           ))}
         </div>
 
-        {/* Azure Bundle - Compact Design */}
+        {/* Azure Bundle - Mobile Responsive */}
         <div 
-          className={`mt-16 text-center reveal reveal-scale ${revealedElements.has('bundle-offer') ? 'revealed' : ''}`}
+          className={`mt-12 text-center reveal reveal-scale ${revealedElements.has('bundle-offer') ? 'revealed' : ''}`}
           data-reveal-id="bundle-offer"
         >
-          <div className="bg-[#003366] rounded-xl p-8 text-white shadow-lg relative overflow-hidden max-w-4xl mx-auto">
+          <div className="bg-[#003366] rounded-xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden max-w-3xl mx-auto">
             <div className="relative z-10">
-              <div className="inline-flex items-center bg-yellow-500 text-[#003366] px-4 py-2 rounded-full text-sm font-bold mb-4">
+              <div className="inline-flex items-center bg-yellow-500 text-[#003366] px-3 py-2 rounded-full text-xs sm:text-sm font-bold mb-4">
                 🎯 BUNDLE OFFER
               </div>
-              <h3 className="text-3xl font-bold mb-3">Complete Azure Certification Bundle</h3>
-              <p className="text-lg mb-6 text-blue-100">Get all three courses together and save money</p>
+              <h3 className="text-2xl sm:text-3xl font-bold mb-3">Complete Azure Bundle</h3>
+              <p className="text-sm sm:text-lg mb-6 text-blue-100">Get all three courses and save money</p>
               
-              <div className="flex items-center justify-center space-x-6 mb-6">
-                <span className="text-xl line-through opacity-75 text-blue-200">₹75,000</span>
-                <span className="text-4xl font-bold text-yellow-400">₹65,000</span>
-                <div className="bg-green-500 px-3 py-1 rounded-lg text-sm font-bold">
+              <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-6 mb-6">
+                <span className="text-lg sm:text-xl line-through opacity-75 text-blue-200">₹75,000</span>
+                <span className="text-3xl sm:text-4xl font-bold text-yellow-400">₹65,000</span>
+                <div className="bg-green-500 px-3 py-1 rounded-lg text-xs sm:text-sm font-bold">
                   Save ₹10,000
                 </div>
               </div>
 
               <button 
                 onClick={openModal}
-                className="bg-white text-[#003366] px-8 py-3 rounded-lg font-semibold hover:bg-yellow-50 transition-all duration-300"
+                className="bg-white text-[#003366] px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-yellow-50 transition-all duration-300 w-full sm:w-auto"
               >
                 Get Bundle Now
               </button>

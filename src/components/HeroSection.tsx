@@ -17,11 +17,11 @@ export default function HeroSection({ revealedElements, scrollToSection }: HeroS
         }}></div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-6xl pt-6 md:pt-0 mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center space-y-8">
           <div className="space-y-6">
             <h1 
-              className={`text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight text-gray-900 reveal reveal-up ${revealedElements.has('hero-title') ? 'revealed' : ''}`}
+              className={`text-3xl lg:text-4xl font-bold leading-tight text-gray-900 reveal reveal-up ${revealedElements.has('hero-title') ? 'revealed' : ''}`}
               data-reveal-id="hero-title"
             >
               Master Azure Cloud
@@ -29,7 +29,7 @@ export default function HeroSection({ revealedElements, scrollToSection }: HeroS
             </h1>
             
             <p 
-              className={`text-xl sm:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed reveal reveal-up ${revealedElements.has('hero-subtitle') ? 'revealed' : ''}`}
+              className={`text-md lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed reveal reveal-up ${revealedElements.has('hero-subtitle') ? 'revealed' : ''}`}
               data-reveal-id="hero-subtitle"
               style={{ transitionDelay: '0.2s' }}
             >
@@ -41,8 +41,8 @@ export default function HeroSection({ revealedElements, scrollToSection }: HeroS
               data-reveal-id="hero-instructor"
               style={{ transitionDelay: '0.3s' }}
             >
-              <div className="w-3 h-3 bg-[#003366] rounded-full mr-3"></div>
-              <span className="text-[#003366] font-semibold">Led by S Mohammed Khan with 12+ Years of Experience</span>
+              <div className="w-3 h-3 bg-[#003366] rounded-full mr-3 hidden md:block"></div>
+              <span className="text-[#003366] font-semibold text-sm lg:text-lg">Led by S Mohammed Khan with 12+ Years of Experience</span>
             </div>
           </div>
 
@@ -53,13 +53,13 @@ export default function HeroSection({ revealedElements, scrollToSection }: HeroS
           >
             <button 
               onClick={() => scrollToSection('courses')}
-              className="bg-[#003366] text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#004080] transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="bg-[#003366] text-white px-8 py-2 md:py-4 rounded-lg font-semibold text-lg hover:bg-[#004080] transition-all duration-300 shadow-lg hover:shadow-xl"
             >
-              Start Your Cloud Journey Today
+              Start Your Journey
             </button>
             <button 
               onClick={() => scrollToSection('whyUtKloud')}
-              className="border-2 border-[#003366] text-[#003366] px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#003366] hover:text-white transition-all duration-300"
+              className="border-2 border-[#003366] text-[#003366] px-8 py-1 md:py-4 rounded-lg font-semibold text-lg hover:bg-[#003366] hover:text-white transition-all duration-300"
             >
               Learn More
             </button>
@@ -67,22 +67,22 @@ export default function HeroSection({ revealedElements, scrollToSection }: HeroS
 
           {/* Professional Stats */}
           <aside 
-            className={`grid grid-cols-1 sm:grid-cols-3 gap-8 mt-16 pt-16 border-t border-gray-200 reveal reveal-up ${revealedElements.has('hero-stats') ? 'revealed' : ''}`}
+            className={`grid grid-cols-1 sm:grid-cols-3 gap-8 mt-4 pt-4 md:mt-16 md:pt-16 border-t border-gray-200 reveal reveal-up ${revealedElements.has('hero-stats') ? 'revealed' : ''}`}
             data-reveal-id="hero-stats"
             style={{ transitionDelay: '0.6s' }}
             aria-label="Company statistics"
           >
             <article className="text-center">
-              <data value="500" className="text-5xl sm:text-6xl font-bold text-[#003366] mb-2">500+</data>
-              <p className="text-gray-600 font-medium uppercase text-sm tracking-wide">Azure Professionals Trained</p>
+              <data value="500" className="text-2xl sm:text-6xl font-bold text-[#003366] mb-2">500+</data>
+              <p className="text-gray-600 font-medium uppercase text-xs sm:text-sm tracking-wide">Azure Professionals Trained</p>
             </article>
             <article className="text-center">
-              <data value="95" className="text-5xl sm:text-6xl font-bold text-[#003366] mb-2">95%</data>
-              <p className="text-gray-600 font-medium uppercase text-sm tracking-wide">Certification Pass Rate</p>
+              <data value="95" className="text-2xl sm:text-6xl font-bold text-[#003366] mb-2">95%</data>
+              <p className="text-gray-600 font-medium uppercase text-xs sm:text-sm tracking-wide">Certification Pass Rate</p>
             </article>
             <article className="text-center">
-              <data value="12" className="text-5xl sm:text-6xl font-bold text-[#003366] mb-2">12+</data>
-              <p className="text-gray-600 font-medium uppercase text-sm tracking-wide">Years of Experience</p>
+              <data value="12" className="text-2xl sm:text-6xl font-bold text-[#003366] mb-2">12+</data>
+              <p className="text-gray-600 font-medium uppercase text-xs sm:text-sm tracking-wide">Years of Experience</p>
             </article>
           </aside>
         </div>

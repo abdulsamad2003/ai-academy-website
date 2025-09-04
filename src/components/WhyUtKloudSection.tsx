@@ -229,16 +229,16 @@ export default function WhyUtKloudSection({ revealedElements }: WhyUtKloudSectio
           className={`text-center mb-16 reveal reveal-up ${revealedElements.has('about-header') ? 'revealed' : ''}`}
           data-reveal-id="about-header"
         >
-          <div className="inline-flex items-center bg-[#003366]/5 border border-[#003366]/20 rounded-full px-6 py-2 mb-6">
-            <div className="w-2 h-2 bg-[#003366] rounded-full mr-3"></div>
-            <span className="text-[#003366] font-semibold text-sm uppercase tracking-wide">Why Choose Us</span>
+          <div className="inline-flex items-center bg-[#003366]/5 border border-[#003366]/20 rounded-full px-4 py-2 mb-4">
+            <div className="w-2 h-2 bg-[#003366] rounded-full mr-2"></div>
+            <span className="text-[#003366] font-semibold text-xs uppercase tracking-wide">Why Choose Us</span>
           </div>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-2">
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold mb-3">
             <span className="text-gray-900">Why</span>
-            <span className="text-[#003366] ml-3">UT-Kloud?</span>
+            <span className="text-[#003366] ml-2">UT-Kloud?</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-tight">
-            We&apos;re bridging the gap between traditional education and the cloud-driven future. <br />
+          <p className="text-sm sm:text-lg lg:text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed px-4">
+            We&apos;re bridging the gap between traditional education and the cloud-driven future. <br className="hidden sm:block" />
             <span className="font-semibold">Your success is our mission.</span>
           </p>
         </div>
