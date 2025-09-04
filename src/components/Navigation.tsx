@@ -33,17 +33,21 @@ export default function Navigation({ scrollToSection }: NavigationProps) {
     
     window.addEventListener('scroll', handleScroll);
     handleScroll(); // Call once to set initial state
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.body.style.overflow = 'unset'; // Cleanup: restore scrolling
+    };
   }, []);
 
   const handleNavigation = (id: string) => {
     scrollToSection(id);
     setIsMobileMenuOpen(false); // Close mobile menu after navigation
+    document.body.style.overflow = 'unset'; // Restore scrolling when menu closes
   };
 
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-white/95 backdrop-blur-sm shadow-xl border-b border-[#003366]/20' : 'bg-transparent'
+      isScrolled ? 'bg-white/95 backdrop-blur-sm shadow-xl border-b border-[#003366]/20' : 'md:bg-transparent bg-white'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
@@ -124,7 +128,15 @@ export default function Navigation({ scrollToSection }: NavigationProps) {
             </button>
             {/* Mobile menu button */}
             <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => {
+                const newState = !isMobileMenuOpen;
+                setIsMobileMenuOpen(newState);
+                if (newState) {
+                  document.body.style.overflow = 'hidden';
+                } else {
+                  document.body.style.overflow = 'unset';
+                }
+              }}
               className="md:hidden text-[#003366] hover:text-[#004080] focus:outline-none mobile-menu-button transition-colors duration-300"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,7 +153,7 @@ export default function Navigation({ scrollToSection }: NavigationProps) {
       
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white/95 backdrop-blur-sm border-t border-[#003366]/20 shadow-lg">
+        <div className="md:hidden h-[100vh] bg-white/95 backdrop-blur-sm border-t border-[#003366]/20 shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex flex-col space-y-4">
               <button 

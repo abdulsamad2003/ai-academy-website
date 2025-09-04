@@ -110,14 +110,28 @@ html {
   transform: scale(1);
 }
 
-/* Simple Clean Cursor - Bigger Main Cursor */
-body {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="rgba(0,0,0,0.8)"/></svg>') 12 12, auto;
+/* Custom Cursor for Desktop Only */
+@media (min-width: 768px) {
+  /* Simple Clean Cursor - Bigger Main Cursor */
+  body {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="rgba(0,0,0,0.8)"/></svg>') 12 12, auto;
+  }
+
+  /* Interactive elements get an even larger cursor */
+  button, a, .cursor-pointer, .course-card, .social-icon, .mobile-menu-button, nav button, nav a, input, textarea {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 50 50"><circle cx="25" cy="25" r="10" fill="rgba(0,0,0,0.9)"/></svg>') 25 25, pointer;
+  }
 }
 
-/* Interactive elements get an even larger cursor */
-button, a, .cursor-pointer, .course-card, .social-icon, .mobile-menu-button, nav button, nav a, input, textarea {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 50 50"><circle cx="25" cy="25" r="10" fill="rgba(0,0,0,0.9)"/></svg>') 25 25, pointer;
+/* Normal cursor for mobile devices */
+@media (max-width: 767px) {
+  body {
+    cursor: auto;
+  }
+  
+  button, a, .cursor-pointer, .course-card, .social-icon, .mobile-menu-button, nav button, nav a, input, textarea {
+    cursor: pointer;
+  }
 }
 
 /* Cursor Trailing Line */

@@ -324,7 +324,10 @@ export default function CoursesSection({ revealedElements }: CoursesSectionProps
                       {course.tag}
                     </div>
                   </div>
-                  <button className="w-full bg-[#003366] text-white py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-[#004080] transition-colors duration-300">
+                  <button 
+                    onClick={openModal}
+                    className="w-full bg-[#003366] text-white py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-[#004080] transition-colors duration-300"
+                  >
                     Enroll Now
                   </button>
                 </div>
