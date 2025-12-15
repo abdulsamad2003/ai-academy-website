@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
-
-interface CoursesSectionProps {
-  revealedElements: Set<string>;
-}
+import { apiPost } from '@/utils/api';
 
 interface Course {
   id: string;
@@ -12,7 +9,7 @@ interface Course {
   image: string;
   badge: string;
   price: string;
-  tag: string;
+  tag?: string;
   popular?: boolean;
   features: string[];
   delay: string;
@@ -77,17 +74,78 @@ const courses: Course[] = [
   }
 ];
 
-export default function CoursesSection({ revealedElements }: CoursesSectionProps) {
+export default function CoursesSection({ revealedElements }: { revealedElements: Set<string> }) {
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const openModal = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{success?: boolean, message?: string} | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    experience: '',
+  });
+  const openModal = (course: Course) => {
+    setSelectedCourse(course);
     setIsModalOpen(true);
     document.body.style.overflow = 'hidden'; // Prevent background scrolling
   };
   
   const closeModal = () => {
     setIsModalOpen(false);
+    setSelectedCourse(null);
+    // Reset form
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      experience: '',
+    });
+    setSubmitStatus(null);
     document.body.style.overflow = 'unset'; // Restore scrolling
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      const result = await apiPost('/api/enrollment/submit', {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        experience: formData.experience,
+        course: selectedCourse?.title || 'Unknown Course',
+        type: 'enrollment'
+      });
+
+      if (result.success) {
+        setSubmitStatus({ success: true, message: 'Enrollment successful! We will contact you soon.' });
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          experience: '',
+        });
+      } else {
+        setSubmitStatus({ success: false, message: result.message || 'Failed to enroll. Please try again.' });
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setSubmitStatus({ success: false, message: 'Network error. Please check your connection and try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Cleanup on unmount
@@ -106,7 +164,9 @@ export default function CoursesSection({ revealedElements }: CoursesSectionProps
             <div className="p-6">
               {/* Modal Header */}
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-900">Azure Bundle Enrollment</h3>
+                <h3 className="text-xl font-bold text-gray-900">
+                  {selectedCourse ? `${selectedCourse.title} Enrollment` : 'Course Enrollment'}
+                </h3>
                 <button 
                   onClick={closeModal}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -117,17 +177,23 @@ export default function CoursesSection({ revealedElements }: CoursesSectionProps
                 </button>
               </div>
 
-              {/* Bundle Info - Compact */}
-              <div className="bg-[#003366]/10 rounded-lg p-3 mb-4 text-center">
-                <div className="text-sm font-bold text-[#003366] mb-1">Bundle Price: ₹65,000</div>
-                <div className="text-xs text-green-600 font-semibold">Save ₹10,000</div>
-              </div>
+              {/* Course Info - Compact */}
+              {selectedCourse && (
+                <div className="bg-[#003366]/10 rounded-lg p-3 mb-4 text-center">
+                  <div className="text-sm font-bold text-[#003366] mb-1">{selectedCourse.title}</div>
+                  <div className="text-xs text-gray-600">{selectedCourse.subtitle}</div>
+                  <div className="text-sm font-bold text-[#003366] mt-2">Price: {selectedCourse.price}</div>
+                </div>
+              )}
 
               {/* Compact Form */}
-              <form className="space-y-3">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
                   <input 
                     type="text" 
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
                     required
                     className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-all duration-300"
                     placeholder="Full Name *"
@@ -137,6 +203,9 @@ export default function CoursesSection({ revealedElements }: CoursesSectionProps
                 <div>
                   <input 
                     type="email" 
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
                     required
                     className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-all duration-300"
                     placeholder="Email Address *"
@@ -146,6 +215,9 @@ export default function CoursesSection({ revealedElements }: CoursesSectionProps
                 <div>
                   <input 
                     type="tel" 
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
                     required
                     className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-all duration-300"
                     placeholder="Phone Number *"
@@ -153,7 +225,12 @@ export default function CoursesSection({ revealedElements }: CoursesSectionProps
                 </div>
 
                 <div>
-                  <select className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-all duration-300">
+                  <select 
+                    name="experience"
+                    value={formData.experience}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-all duration-300"
+                  >
                     <option value="" className="text-gray-500">Experience Level</option>
                     <option value="beginner">Beginner (0-1 years)</option>
                     <option value="intermediate">Intermediate (1-3 years)</option>
@@ -161,6 +238,16 @@ export default function CoursesSection({ revealedElements }: CoursesSectionProps
                     <option value="student">Student</option>
                   </select>
                 </div>
+
+                {submitStatus && (
+                  <div className={`p-2 rounded text-sm ${
+                    submitStatus.success 
+                      ? 'bg-green-100 text-green-700' 
+                      : 'bg-red-100 text-red-700'
+                  }`}>
+                    {submitStatus.message}
+                  </div>
+                )}
 
                 <div className="flex space-x-3 pt-3">
                   <button
@@ -172,9 +259,10 @@ export default function CoursesSection({ revealedElements }: CoursesSectionProps
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 bg-[#003366] text-white rounded-lg font-medium hover:bg-[#004080] transition-all duration-300"
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-2 bg-[#003366] text-white rounded-lg font-medium hover:bg-[#004080] transition-all duration-300 disabled:opacity-50"
                   >
-                    Enroll Now
+                    {isSubmitting ? 'Processing...' : 'Enroll Now'}
                   </button>
                 </div>
               </form>
@@ -268,8 +356,7 @@ export default function CoursesSection({ revealedElements }: CoursesSectionProps
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {courses.map((course) => (
-            <div 
+          {courses.map((course: Course) => (            <div 
               key={course.id}
               className={`group bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden reveal ${course.animation} course-card ${revealedElements.has(course.id) ? 'revealed' : ''} flex flex-col h-full`}
               data-reveal-id={course.id}
@@ -307,8 +394,7 @@ export default function CoursesSection({ revealedElements }: CoursesSectionProps
                   
                   {/* Course Topics - Compact */}
                   <div className="space-y-1 mb-3">
-                    {course.features.map((feature, index) => (
-                      <div key={index} className="flex items-center text-gray-700">
+                    {course.features.map((feature: string, index: number) => (                      <div key={index} className="flex items-center text-gray-700">
                         <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#003366] rounded-full mr-2 sm:mr-3 flex-shrink-0"></div>
                         <span className="text-xs sm:text-sm">{feature}</span>
                       </div>
@@ -325,7 +411,7 @@ export default function CoursesSection({ revealedElements }: CoursesSectionProps
                     </div>
                   </div>
                   <button 
-                    onClick={openModal}
+                    onClick={() => openModal(course)}
                     className="w-full bg-[#003366] text-white py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-[#004080] transition-colors duration-300"
                   >
                     Enroll Now
@@ -358,7 +444,19 @@ export default function CoursesSection({ revealedElements }: CoursesSectionProps
               </div>
 
               <button 
-                onClick={openModal}
+                onClick={() => openModal({
+                  id: 'bundle',
+                  title: 'Complete Azure Bundle',
+                  subtitle: 'All Courses Bundle',
+                  description: 'Complete bundle including AZ-104, AZ-305, and Azure DevOps courses',
+                  image: '/assests/bundle.jpg',
+                  badge: 'BUNDLE',
+                  price: '₹65,000',
+                  tag: 'Best Value',
+                  features: ['All Course Materials', 'Priority Support', 'Practice Exams', 'Certificate of Completion'],
+                  delay: '0s',
+                  animation: 'reveal-scale'
+                })}
                 className="bg-white text-[#003366] px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-yellow-50 transition-all duration-300 w-full sm:w-auto"
               >
                 Get Bundle Now

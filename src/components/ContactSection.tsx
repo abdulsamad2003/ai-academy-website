@@ -1,8 +1,65 @@
+import { useState } from 'react';
+import { apiPost } from '@/utils/api';
+
 interface ContactSectionProps {
   revealedElements: Set<string>;
 }
 
 export default function ContactSection({ revealedElements }: ContactSectionProps) {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    course: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{success?: boolean, message?: string} | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      const result = await apiPost('/api/enrollment/submit', {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        course: formData.course,
+        message: formData.message,
+        type: 'contact'
+      });
+
+      if (result.success) {
+        setSubmitStatus({ success: true, message: 'Message sent successfully! We will contact you soon.' });
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          course: '',
+          message: ''
+        });
+      } else {
+        setSubmitStatus({ success: false, message: result.message || 'Failed to send message. Please try again.' });
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setSubmitStatus({ success: false, message: 'Network error. Please check your connection and try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <section id="contact" className="py-12 bg-gray-50 relative z-10">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -29,38 +86,72 @@ export default function ContactSection({ revealedElements }: ContactSectionProps
           data-reveal-id="contact-form"
         >
           <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 text-center">Contact Us</h3>
-          <div className="grid grid-cols-1 gap-3">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3">
             <input 
               type="text" 
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
               placeholder="Your Name" 
+              required
               className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-all duration-300"
             />
             <input 
               type="email" 
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
               placeholder="Email Address" 
+              required
               className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-all duration-300"
             />
             <input 
               type="tel" 
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
               placeholder="Phone Number" 
+              required
               className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-all duration-300"
             />
-            <select className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-all duration-300">
+            <select 
+              name="course"
+              value={formData.course}
+              onChange={handleChange}
+              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-[#003366] transition-all duration-300"
+            >
               <option value="">Course Interest</option>
-              <option value="az104">AZ-104 Administrator</option>
-              <option value="az305">AZ-305 Architect</option>
-              <option value="devops">Azure DevOps</option>
-              <option value="bundle">Complete Bundle</option>
+              <option value="AZ-104">AZ-104 Administrator</option>
+              <option value="AZ-305">AZ-305 Architect</option>
+              <option value="Azure DevOps">Azure DevOps</option>
+              <option value="Complete Bundle">Complete Bundle</option>
             </select>
             <textarea 
+              name="message"
+              value={formData.message}
+              onChange={handleChange}
               placeholder="Your Azure learning goals..." 
               rows={2}
               className="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#003366] focus:border-[#003366] resize-none transition-all duration-300"
             ></textarea>
-            <button className="w-full bg-[#003366] text-white px-4 py-2 text-sm rounded-lg font-semibold hover:bg-[#004080] transition-all duration-300">
-              Send Message
+            <button 
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-[#003366] text-white px-4 py-2 text-sm rounded-lg font-semibold hover:bg-[#004080] transition-all duration-300 disabled:opacity-50"
+            >
+              {isSubmitting ? 'Sending...' : 'Send Message'}
             </button>
-          </div>
+          </form>
+          
+          {submitStatus && (
+            <div className={`mt-4 p-3 rounded-lg text-sm ${
+              submitStatus.success 
+                ? 'bg-green-100 text-green-700 border border-green-200' 
+                : 'bg-red-100 text-red-700 border border-red-200'
+            }`}>
+              {submitStatus.message}
+            </div>
+          )}
         </div>
 
         {/* Training Schedule - Compact */}
