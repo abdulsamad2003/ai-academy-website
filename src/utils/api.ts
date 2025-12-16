@@ -28,3 +28,22 @@ export const apiPost = async (endpoint: string, data: Record<string, unknown>) =
   
   return response.json();
 };
+
+/**
+ * Make a GET request to the API
+ * @param endpoint - The API endpoint (without base URL)
+ * @returns The response from the API
+ */
+export const apiGet = async (endpoint: string) => {
+  const baseUrl = getApiBaseUrl();
+  const url = `${baseUrl}${endpoint}`;
+  
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  
+  return response.json();
+};

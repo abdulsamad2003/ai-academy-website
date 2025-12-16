@@ -16,7 +16,8 @@ interface Course {
   animation: string;
 }
 
-const courses: Course[] = [
+// Default courses as fallback
+const defaultCourses: Course[] = [
   {
     id: 'course-az104',
     title: 'Azure Administrator',
@@ -75,6 +76,8 @@ const courses: Course[] = [
 ];
 
 export default function CoursesSection({ revealedElements }: { revealedElements: Set<string> }) {
+  const [courses, setCourses] = useState<Course[]>(defaultCourses);
+  const [loading, setLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,6 +88,99 @@ export default function CoursesSection({ revealedElements }: { revealedElements:
     phone: '',
     experience: '',
   });
+
+  // Fetch courses from API
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  // Debug: Log when courses change
+  useEffect(() => {
+    console.log('Courses state updated - Length:', courses.length);
+    console.log('Courses state updated - Data:', courses);
+    console.log('Loading state:', loading);
+  }, [courses, loading]);
+
+
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:10000';
+      console.log('Fetching courses from:', `${apiBaseUrl}/api/our-section/all`);
+      
+      const response = await fetch(`${apiBaseUrl}/api/our-section/all`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      console.log('Courses API Response status:', response.status);
+      
+      if (response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          console.log('Courses API Data:', data);
+          
+          if (data.success && data.data && Array.isArray(data.data)) {
+            console.log('Total items from API:', data.data.length);
+            console.log('All items categories:', data.data.map((item: any) => ({ title: item.title, category: item.category })));
+            
+            // Filter items with category 'course' or 'courses' (case insensitive)
+            const courseItems = data.data
+              .filter((item: any) => {
+                const category = (item.category || '').toLowerCase().trim();
+                const isCourse = category === 'course' || category === 'courses';
+                console.log(`Item "${item.title}" - Category: "${item.category}" - Is Course: ${isCourse}`);
+                return isCourse;
+              })
+              .map((item: any, index: number) => ({
+                id: item._id || `course-${index}`,
+                title: item.title || 'Untitled Course',
+                subtitle: item.subtitle || item.title || '',
+                description: item.description || '',
+                image: item.image || '/assests/course-1.jpg',
+                badge: item.badge || item.category || 'Course',
+                price: item.price || 'Contact Us',
+                tag: item.tag || 'New Course',
+                popular: item.popular || false,
+                features: item.features ? (Array.isArray(item.features) ? item.features : (typeof item.features === 'string' ? item.features.split(',').map((f: string) => f.trim()) : [])) : [],
+                delay: `${(index * 0.1).toFixed(1)}s`,
+                animation: index % 3 === 0 ? 'reveal-left' : index % 3 === 1 ? 'reveal-up' : 'reveal-right'
+              }));
+            
+            console.log('Filtered course items:', courseItems.length);
+            
+            // Always set courses from API
+            console.log('Setting courses from API - Count:', courseItems.length);
+            console.log('Setting courses from API - Full Data:', JSON.stringify(courseItems, null, 2));
+            
+            if (courseItems.length > 0) {
+              // Force update by creating a new array reference
+              setCourses([...courseItems]);
+              console.log('Courses state updated! Count:', courseItems.length);
+            } else {
+              console.log('No courses found with category "course" or "courses". Keeping default courses.');
+              // Keep default courses if no API courses found
+            }
+          } else {
+            console.log('API response format issue:', data);
+          }
+        } else {
+          const text = await response.text();
+          console.error('Expected JSON but got:', text.substring(0, 200));
+        }
+      } else {
+        console.error('API request failed with status:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      // Keep default courses on error
+    } finally {
+      setLoading(false);
+    }
+  };
   const openModal = (course: Course) => {
     setSelectedCourse(course);
     setIsModalOpen(true);
@@ -355,13 +451,29 @@ export default function CoursesSection({ revealedElements }: { revealedElements:
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {courses.map((course: Course) => (            <div 
-              key={course.id}
-              className={`group bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden reveal ${course.animation} course-card ${revealedElements.has(course.id) ? 'revealed' : ''} flex flex-col h-full`}
-              data-reveal-id={course.id}
-              style={{ transitionDelay: course.delay }}
-            >
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Loading courses...</p>
+          </div>
+        ) : courses.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600">No courses available at the moment.</p>
+            <p className="text-sm text-gray-500 mt-2">Check browser console for debugging info.</p>
+            <p className="text-xs text-gray-400 mt-1">Courses count: {courses.length}, Loading: {loading ? 'true' : 'false'}</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {courses.map((course: Course, idx: number) => {
+              console.log(`Rendering course ${idx}:`, course.title);
+              return (
+                <div 
+                  key={course.id}
+                  className="group bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden course-card flex flex-col h-full opacity-100"
+                  data-reveal-id={course.id}
+                  style={{ 
+                    animation: `fadeInUp 0.6s ease-out ${course.delay} forwards`
+                  }}
+                >
               {/* Course Image - Smaller on Mobile */}
               <div className="relative h-32 sm:h-40 lg:h-48 overflow-hidden flex-shrink-0">
                 <img 
@@ -393,13 +505,16 @@ export default function CoursesSection({ revealedElements }: { revealedElements:
                   </p>
                   
                   {/* Course Topics - Compact */}
-                  <div className="space-y-1 mb-3">
-                    {course.features.map((feature: string, index: number) => (                      <div key={index} className="flex items-center text-gray-700">
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#003366] rounded-full mr-2 sm:mr-3 flex-shrink-0"></div>
-                        <span className="text-xs sm:text-sm">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
+                  {course.features && course.features.length > 0 && (
+                    <div className="space-y-1 mb-3">
+                      {course.features.map((feature: string, index: number) => (
+                        <div key={index} className="flex items-center text-gray-700">
+                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#003366] rounded-full mr-2 sm:mr-3 flex-shrink-0"></div>
+                          <span className="text-xs sm:text-sm">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Pricing & CTA - Mobile Optimized */}
@@ -418,9 +533,11 @@ export default function CoursesSection({ revealedElements }: { revealedElements:
                   </button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Azure Bundle - Mobile Responsive */}
         <div 

@@ -7,6 +7,7 @@ import BackgroundShapes from '@/components/BackgroundShapes';
 import HeroSection from '@/components/HeroSection';
 import CoursesSection from '@/components/CoursesSection';
 import WhyUtKloudSection from '@/components/WhyUtKloudSection';
+import OurSection from '@/components/OurSection';
 import ContactSection from '@/components/ContactSection';
 import Footer from '@/components/Footer';
 
@@ -29,11 +30,24 @@ export default function Home() {
       { threshold: 0.1, rootMargin: '50px' }
     );
 
-    // Observe all elements with data-reveal-id
-    const revealElements = document.querySelectorAll('[data-reveal-id]');
-    revealElements.forEach(el => observer.observe(el));
+    // Function to observe all elements
+    const observeElements = () => {
+      const revealElements = document.querySelectorAll('[data-reveal-id]');
+      revealElements.forEach(el => observer.observe(el));
+    };
 
-    return () => observer.disconnect();
+    // Initial observation
+    observeElements();
+
+    // Re-observe periodically to catch dynamically added elements (like courses)
+    const interval = setInterval(() => {
+      observeElements();
+    }, 1000);
+
+    return () => {
+      observer.disconnect();
+      clearInterval(interval);
+    };
   }, []);
 
   const scrollToSection = (id: string) => {
@@ -48,6 +62,7 @@ export default function Home() {
       <HeroSection revealedElements={revealedElements} scrollToSection={scrollToSection} />
       <CoursesSection revealedElements={revealedElements} />
       <WhyUtKloudSection revealedElements={revealedElements} />
+      <OurSection revealedElements={revealedElements} />
       <ContactSection revealedElements={revealedElements} />
       <Footer scrollToSection={scrollToSection} />
     </div>
