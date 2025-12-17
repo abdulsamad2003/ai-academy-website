@@ -161,22 +161,30 @@ export default function CoursesSection({ revealedElements }: { revealedElements:
               setCourses([...courseItems]);
               console.log('Courses state updated! Count:', courseItems.length);
             } else {
-              console.log('No courses found with category "course" or "courses". Keeping default courses.');
-              // Keep default courses if no API courses found
+              console.log('No courses found with category "course" or "courses". Showing default courses.');
+              // Explicitly restore default courses when API returns 0 courses
+              setCourses([...defaultCourses]);
             }
           } else {
             console.log('API response format issue:', data);
+            // Bad format: fall back to defaults
+            setCourses([...defaultCourses]);
           }
         } else {
           const text = await response.text();
           console.error('Expected JSON but got:', text.substring(0, 200));
+          // Not JSON: fall back to defaults
+          setCourses([...defaultCourses]);
         }
       } else {
         console.error('API request failed with status:', response.status);
+        // HTTP error: fall back to defaults
+        setCourses([...defaultCourses]);
       }
     } catch (error) {
       console.error('Error fetching courses:', error);
-      // Keep default courses on error
+      // Network/other error: fall back to defaults
+      setCourses([...defaultCourses]);
     } finally {
       setLoading(false);
     }
