@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { apiGet } from '@/utils/api';
 
 interface OurSectionProps {
   revealedElements: Set<string>;

@@ -16,6 +16,25 @@ interface Course {
   animation: string;
 }
 
+type ApiCourseItem = {
+  _id?: string;
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  image?: string;
+  badge?: string;
+  price?: string;
+  tag?: string;
+  popular?: boolean;
+  features?: string[] | string;
+  category?: string;
+};
+
+type ApiOurSectionAllResponse = {
+  success?: boolean;
+  data?: ApiCourseItem[];
+};
+
 // Default courses as fallback
 const defaultCourses: Course[] = [
   {
@@ -120,22 +139,22 @@ export default function CoursesSection({ revealedElements }: { revealedElements:
       if (response.ok) {
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
+          const data: ApiOurSectionAllResponse = await response.json();
           console.log('Courses API Data:', data);
           
           if (data.success && data.data && Array.isArray(data.data)) {
             console.log('Total items from API:', data.data.length);
-            console.log('All items categories:', data.data.map((item: any) => ({ title: item.title, category: item.category })));
+            console.log('All items categories:', data.data.map((item: ApiCourseItem) => ({ title: item.title, category: item.category })));
             
             // Filter items with category 'course' or 'courses' (case insensitive)
             const courseItems = data.data
-              .filter((item: any) => {
+              .filter((item: ApiCourseItem) => {
                 const category = (item.category || '').toLowerCase().trim();
                 const isCourse = category === 'course' || category === 'courses';
                 console.log(`Item "${item.title}" - Category: "${item.category}" - Is Course: ${isCourse}`);
                 return isCourse;
               })
-              .map((item: any, index: number) => ({
+              .map((item: ApiCourseItem, index: number) => ({
                 id: item._id || `course-${index}`,
                 title: item.title || 'Untitled Course',
                 subtitle: item.subtitle || item.title || '',
